@@ -1,0 +1,19 @@
+<package>
+  <description brief="pom">
+
+     pom
+
+  </description>
+  <author>Guido ManfrediInconnuInconnu0561336342</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pom</url>
+  <depend package="roscpp"/>
+  <depend package="cv_bridge"/>
+  <depend package="opencv2"/>
+  <depend package="pcl_ros"/>
+  <depend package="pr2_gripper_sensor_action"/>
+
+</package>
+
+

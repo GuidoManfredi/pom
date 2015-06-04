@@ -1,0 +1,91 @@
+#include <ros/ros.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/CameraInfo.h>
+
+#include <tf/transform_broadcaster.h>
+
+#include "opencv2/highgui/highgui.hpp"
+
+#include "../pom/POD.h"
+#include "pom/RecolocService.h"
+
+// !!! ATTENTION ! NE JAMAIS METTRE 2 FOIS LA MEME IMAGE DANS LE MODELE !!!
+// si des descripteurs sont en double, lors du matching ils ne seront pas pris
+// en compte par siftgpu, vas savoir pourquoi...
+
+using namespace std;
+using namespace cv;
+namespace enc = sensor_msgs::image_encodings;
+
+POD detecter;
+Object object;
+Mat cur_img;
+vector<Mat> Ps;
+vector<string> names;
+string camera_frame;
+
+cv::Mat rosK2cvK(double fx, double fy, double cx, double cy);
+
+
+bool recoloc(pom::Recoloc::Request  &req, pom::Recoloc::Response &res) {
+//    int start = cv::getTickCount();
+    detecter.process (curr_img, Ps, names); // MAIN CALL
+    res.names = names;
+//    int end = cv::getTickCount();
+//    float time_period = 1 / cv::getTickFrequency();
+}
+
+void intrinsic_callback(const sensor_msgs::CameraInfoConstPtr& msg) {
+    if (!detecter.isIntrinsicSet()) {
+        cv::Mat K = rosK2cvK(msg->P[0], msg->P[5], msg->P[2], msg->P[6]);
+        //cout << K << endl;
+        detecter.setIntrinsic(K);
+        ROS_INFO("Loaded intrinsic parameters");
+    }
+}
+
+void image_callback(const sensor_msgs::ImageConstPtr& msg) {
+    cv_bridge::CvImagePtr cv_ptr;
+    try {
+      cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    }
+    catch (cv_bridge::Exception& e) {
+      ROS_ERROR("cv_bridge exception: %s", e.what());
+      return;
+    }
+    curr_img = cv_ptr->image;
+}
+
+// rosrun opencv_publisher stream 0 webcam image
+// rosrun opencv_display display_poses_from_tf image
+
+// rosrun pom detect_object /narrow_stereo/left/image_rect /narrow_stereo/left/camera_info narrow_stereo_l_stereo_camera_optical_frame objects_list.txt
+// rosrun pom detect_object /narrow_stereo/left/image_rect /narrow_stereo/left/camera_info narrow_stereo_l_stereo_camera_optical_frame object_path
+// rosrun pom detect_object image camera_info camera /home/gmanfred/devel/datasets/my_objects/pom/models/lait.yaml
+int main (int argc, char** argv) {
+	assert (argc == 5 && "Usage : detect_object in_image_topic in_intrisic_topic camera_frame objects_list");
+	ros::init(argc, argv, "pom");
+	ros::NodeHandle n;
+	ros::Subscriber image_subscriber = n.subscribe(argv[1], 1, image_callback);
+	ros::Subscriber intrinsic_subscriber = n.subscribe(argv[2], 1, intrinsic_callback);
+	camera_frame = argv[3];
+
+    ROS_INFO("Loading objects...");
+    int num_objects = detecter.loadObjectsFromList(argv[4]);
+    ROS_INFO("... objects loaded.");
+    ros::ServiceServer service = n.advertiseService("recoloc", recoloc);
+
+    ros::spin()
+
+    return 0;
+}
+
+cv::Mat rosK2cvK(double fx, double fy, double cx, double cy) {
+    return (Mat_<double>(3,3) << fx,  0, cx,
+                                  0, fy, cy,
+                                  0,  0,  1);
+}
+

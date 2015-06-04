@@ -1,0 +1,12 @@
+/home/gmanfred/devel/datasets/my_objects/pom/models/reveil_fruite.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/lait.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/salvetat.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/ble.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/lentilles.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/magazine1.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/magazine2.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/magazine3.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/magazine4.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/magazine5.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/maxwell.yaml
+/home/gmanfred/devel/datasets/my_objects/pom/models/teabag.yaml
